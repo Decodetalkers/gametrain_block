@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use bevy::prelude::Color;
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
