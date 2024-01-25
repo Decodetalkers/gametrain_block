@@ -1,11 +1,16 @@
+#[allow(unused)]
+mod common;
+
+mod utils;
 use bevy::prelude::*;
+use common::*;
 
 struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Menu), main_menu_setup)
-            .add_systems(Update, common_button_system);
+            .add_systems(Update, utils::common_button_system);
     }
 }
 
@@ -46,17 +51,6 @@ enum MenuButtonAction {
     Help,
     Quit,
 }
-
-pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
-pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
-pub const BACKGROUND: Color = Color::rgb(0.27, 0.43, 0.8);
-
-pub const BACKGROUND_COLOR: Color = Color::rgb(0.61, 0.7, 0.71);
-
-pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
-pub const GAME_DATA_TEXT_COLOR: Color = Color::rgb(0., 0.22, 0.76);
 
 pub trait EntitySpawner {
     fn spawn_button(
@@ -201,25 +195,4 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     );
                 });
         });
-}
-
-// Tag component used to mark which setting is currently selected
-#[derive(Component)]
-pub struct SelectedOption;
-
-// This system handles changing all buttons color based on mouse interaction
-pub fn common_button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
-        (Changed<Interaction>, With<Button>),
-    >,
-) {
-    for (interaction, mut color, selected) in &mut interaction_query {
-        *color = match (*interaction, selected) {
-            (Interaction::Pressed, _) | (Interaction::None, Some(_)) => PRESSED_BUTTON.into(),
-            (Interaction::Hovered, Some(_)) => HOVERED_PRESSED_BUTTON.into(),
-            (Interaction::Hovered, None) => HOVERED_BUTTON.into(),
-            (Interaction::None, None) => NORMAL_BUTTON.into(),
-        }
-    }
 }
