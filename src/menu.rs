@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::*;
 use crate::utils;
-use crate::utils::despawn_with_component;
+use crate::utils::{common_button_system, despawn_with_component};
 use crate::GameState;
 
 use utils::EntitySpawner;
@@ -16,7 +16,7 @@ impl Plugin for MenuPlugin {
             despawn_with_component::<OnMainMenuScreen>,
         )
         .add_systems(OnEnter(GameState::Menu), main_menu_setup)
-        .add_systems(Update, utils::common_button_system);
+        .add_systems(Update, (common_button_system, menu_action));
     }
 }
 #[derive(Component)]
@@ -115,4 +115,21 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     );
                 });
         });
+}
+
+fn menu_action(
+    interaction_query: Query<
+        (&Interaction, &MenuButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
+    for (interaction, menu_button_action) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            match menu_button_action {
+                MenuButtonAction::EasyPlay => game_state.set(GameState::Game),
+                _ => {}
+            }
+        }
+    }
 }

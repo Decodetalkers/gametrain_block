@@ -15,7 +15,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "ee".to_string(),
+                title: "hello".to_string(),
                 resizable: false,
                 ..default()
             }),
