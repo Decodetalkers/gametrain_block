@@ -8,6 +8,7 @@ use bevy::prelude::*;
 enum GameState {
     #[default]
     Menu,
+    Game,
 }
 
 fn main() {

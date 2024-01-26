@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::*;
 use crate::utils;
+use crate::utils::despawn_with_component;
 use crate::GameState;
 
 use utils::EntitySpawner;
@@ -10,8 +11,12 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), main_menu_setup)
-            .add_systems(Update, utils::common_button_system);
+        app.add_systems(
+            OnExit(GameState::Menu),
+            despawn_with_component::<OnMainMenuScreen>,
+        )
+        .add_systems(OnEnter(GameState::Menu), main_menu_setup)
+        .add_systems(Update, utils::common_button_system);
     }
 }
 #[derive(Component)]
