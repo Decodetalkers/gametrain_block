@@ -1,4 +1,5 @@
 mod common;
+mod game;
 mod menu;
 
 mod utils;
@@ -24,6 +25,7 @@ fn main() {
         .add_systems(Startup, camera_setup)
         .add_state::<GameState>()
         .add_plugins(menu::MenuPlugin)
+        .add_plugins(game::GamePlugin)
         .run()
 }
 
