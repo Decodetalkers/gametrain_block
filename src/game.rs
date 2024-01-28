@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
 use crate::GameState;
 
@@ -18,15 +18,22 @@ pub struct GamePlugin;
 #[derive(Component)]
 struct Brick(BrickColor);
 
+#[derive(Component)]
+struct RedPlayer;
+
+#[derive(Component)]
+struct BluePlayer;
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Game), set_up_game_data);
+        app.add_systems(
+            OnEnter(GameState::Game),
+            (setup_basedata, setup_player).chain(),
+        );
     }
 }
 
-#[allow(unused)]
-fn set_up_game_data(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
+fn setup_basedata(mut commands: Commands) {
     for index_y in 0..BRICK_COUNT_WIDTH {
         let real_y = (index_y - MID_POS) * BRICK_WIDTH;
         for index_x in 0..BRICK_COUNT_WIDTH {
@@ -34,7 +41,11 @@ fn set_up_game_data(mut commands: Commands, asset_server: Res<AssetServer>) {
             commands.spawn((
                 SpriteBundle {
                     sprite: Sprite {
-                        color: if real_x > 0 { Color::RED } else { Color::BLUE },
+                        color: if real_x > 0 {
+                            Color::GRAY
+                        } else {
+                            Color::TOMATO
+                        },
                         ..default()
                     },
                     transform: Transform {
@@ -60,4 +71,57 @@ fn set_up_game_data(mut commands: Commands, asset_server: Res<AssetServer>) {
             ));
         }
     }
+}
+
+fn setup_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    const LEN: i32 = BRICK_COUNT_WIDTH / 4;
+    const RED_X: i32 = -1 * MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
+    const BLUE_X: i32 = -1 * RED_X;
+
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+            material: materials.add(ColorMaterial::from(Color::PURPLE)),
+            transform: Transform {
+                translation: Vec3 {
+                    x: RED_X as f32,
+                    y: 0.,
+                    z: 1.,
+                },
+                scale : Vec3 {
+                    x: 1.,
+                    y: 1.,
+                    z: 2.,
+                },
+                ..default()
+            },
+            ..default()
+        },
+        RedPlayer,
+    ));
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+            material: materials.add(ColorMaterial::from(Color::PINK)),
+            transform: Transform {
+                translation: Vec3 {
+                    x: BLUE_X as f32,
+                    y: 0.,
+                    z: 1.,
+                },
+                scale : Vec3 {
+                    x: 1.,
+                    y: 1.,
+                    z: 2.,
+                },
+                ..default()
+            },
+            ..default()
+        },
+        RedPlayer,
+    ));
 }
