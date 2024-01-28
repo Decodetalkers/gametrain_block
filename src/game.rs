@@ -17,7 +17,7 @@ const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
 const WALL_THICKNESS: f32 = 20.0;
 // x coordinates
-const LEFT_WALL: f32 = (-1 * MID_POS * BRICK_WIDTH) as f32;
+const LEFT_WALL: f32 = (-MID_POS * BRICK_WIDTH) as f32;
 const RIGHT_WALL: f32 = -1. * LEFT_WALL;
 // y coordinates
 const BOTTOM_WALL: f32 = LEFT_WALL;
@@ -206,8 +206,8 @@ fn setup_player(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     const LEN: i32 = BRICK_COUNT_WIDTH / 4;
-    const RED_X: i32 = -1 * MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
-    const BLUE_X: i32 = -1 * RED_X;
+    const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
+    const BLUE_X: i32 = -RED_X;
 
     commands.spawn((
         MaterialMesh2dBundle {

@@ -6,6 +6,7 @@ use bevy::prelude::*;
 pub struct SelectedOption;
 
 // This system handles changing all buttons color based on mouse interaction
+#[allow(clippy::type_complexity)]
 pub fn common_button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
