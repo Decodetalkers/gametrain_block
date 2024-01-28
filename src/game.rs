@@ -15,7 +15,7 @@ const MID_POS: i32 = BRICK_COUNT_WIDTH / 2;
 
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
-const WALL_THICKNESS: f32 = 20.0;
+const WALL_THICKNESS: f32 = 40.0;
 // x coordinates
 const LEFT_WALL: f32 = (-MID_POS * BRICK_WIDTH) as f32;
 const RIGHT_WALL: f32 = -1. * LEFT_WALL;
