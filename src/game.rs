@@ -121,10 +121,30 @@ struct RedPlayer {
     x: f32,
     y: f32,
 }
+trait Player {
+    fn x(&self) -> f32;
+    fn y(&self) -> f32;
+    fn set_x(&mut self, x: f32);
+    fn set_y(&mut self, y: f32);
+}
 
 impl RedPlayer {
     fn new() -> Self {
         Self { x: 100., y: 100. }
+    }
+}
+impl Player for RedPlayer {
+    fn x(&self) -> f32 {
+        self.x
+    }
+    fn y(&self) -> f32 {
+        self.y
+    }
+    fn set_x(&mut self, x: f32) {
+        self.x = x;
+    }
+    fn set_y(&mut self, y: f32) {
+        self.y = y;
     }
 }
 
@@ -132,6 +152,21 @@ impl RedPlayer {
 struct BluePlayer {
     x: f32,
     y: f32,
+}
+
+impl Player for BluePlayer {
+    fn x(&self) -> f32 {
+        self.x
+    }
+    fn y(&self) -> f32 {
+        self.y
+    }
+    fn set_x(&mut self, x: f32) {
+        self.x = x;
+    }
+    fn set_y(&mut self, y: f32) {
+        self.y = y;
+    }
 }
 
 impl BluePlayer {
@@ -149,7 +184,11 @@ impl Plugin for GamePlugin {
         .add_systems(OnExit(GameState::Game), despawn_with_component::<Collider>)
         .add_systems(
             FixedUpdate,
-            (handle_move, check_collider)
+            (
+                handle_move::<RedPlayer>,
+                handle_move::<BluePlayer>,
+                check_collider,
+            )
                 .chain()
                 .run_if(in_state(GameState::Game)),
         );
@@ -330,18 +369,12 @@ fn check_collider(
     }
 }
 
-fn handle_move(
-    mut red_query: Query<(&mut Transform, &RedPlayer), With<RedPlayer>>,
-    mut blue_query: Query<(&mut Transform, &BluePlayer), Without<RedPlayer>>,
-    timer: Res<Time<Fixed>>,
-) {
-    let (mut player_trans, state) = red_query.single_mut();
-
-    player_trans.translation.x += state.x * timer.delta().as_secs_f32();
-    player_trans.translation.y += state.y * timer.delta().as_secs_f32();
-
+fn handle_move<P>(mut blue_query: Query<(&mut Transform, &P), With<P>>, timer: Res<Time<Fixed>>)
+where
+    P: Player + Component,
+{
     let (mut player_trans, state) = blue_query.single_mut();
 
-    player_trans.translation.x += state.x * timer.delta().as_secs_f32();
-    player_trans.translation.y += state.y * timer.delta().as_secs_f32();
+    player_trans.translation.x += state.x() * timer.delta().as_secs_f32();
+    player_trans.translation.y += state.y() * timer.delta().as_secs_f32();
 }
