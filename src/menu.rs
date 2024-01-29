@@ -21,8 +21,8 @@ impl Plugin for MenuPlugin {
 }
 #[derive(Component)]
 enum MenuButtonAction {
-    EasyPlay,
-    NormalPlay,
+    RegionBattle,
+    RPSBattle,
     HardPlay,
     Help,
     Quit,
@@ -64,7 +64,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     // Display the game name
                     parent.spawn(
                         TextBundle::from_section(
-                            "TETRIS",
+                            "GAMES COLLICATION",
                             TextStyle {
                                 font: font.clone(),
                                 font_size: 80.0,
@@ -84,15 +84,15 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     // - Help
                     // - quit
                     parent.spawn_button(
-                        MenuButtonAction::EasyPlay,
+                        MenuButtonAction::RegionBattle,
                         "right.png",
-                        "Easy",
+                        "RegionBattle",
                         &asset_server,
                     );
                     parent.spawn_button(
-                        MenuButtonAction::NormalPlay,
+                        MenuButtonAction::RPSBattle,
                         "right.png",
-                        "Normal",
+                        "Rock, paper, scissors!",
                         &asset_server,
                     );
                     parent.spawn_button(
@@ -129,7 +129,7 @@ fn menu_action(
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
-                MenuButtonAction::EasyPlay => game_state.set(GameState::Game),
+                MenuButtonAction::RegionBattle => game_state.set(GameState::Game),
                 _ => {}
             }
         }

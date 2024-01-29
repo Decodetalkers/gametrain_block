@@ -3,7 +3,8 @@ mod game;
 mod menu;
 
 mod utils;
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowResolution};
+use common::{WINDOW_HEIGHT, WINDOW_WIDTH};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, States)]
 enum GameState {
@@ -18,6 +19,7 @@ fn main() {
             primary_window: Some(Window {
                 title: "hello".to_string(),
                 resizable: false,
+                resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
                 ..default()
             }),
             ..default()

@@ -44,7 +44,7 @@ impl EntitySpawner for ChildBuilder<'_, '_, '_> {
         let font = asset_server.load("fonts/FiraSans-Bold.ttf");
         let button_style = Style {
             width: Val::Px(250.0),
-            height: Val::Px(65.0),
+            height: Val::Px(95.0),
             margin: UiRect::all(Val::Px(20.0)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,

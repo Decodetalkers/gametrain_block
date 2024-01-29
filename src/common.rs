@@ -12,3 +12,6 @@ pub const BACKGROUND_COLOR: Color = Color::rgb(0.61, 0.7, 0.71);
 
 pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 pub const GAME_DATA_TEXT_COLOR: Color = Color::rgb(0., 0.22, 0.76);
+
+pub const WINDOW_WIDTH: f32 = 1100.;
+pub const WINDOW_HEIGHT: f32 = 1000.;
