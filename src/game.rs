@@ -2,7 +2,7 @@ use bevy::{
     prelude::*,
     sprite::{
         collide_aabb::{collide, Collision},
-        MaterialMesh2dBundle,
+        Anchor, MaterialMesh2dBundle,
     },
 };
 
@@ -22,6 +22,8 @@ const RIGHT_WALL: f32 = -1. * LEFT_WALL;
 // y coordinates
 const BOTTOM_WALL: f32 = LEFT_WALL;
 const TOP_WALL: f32 = RIGHT_WALL;
+
+const GAME_DATA_TEXT_COLOR: Color = Color::rgb(0., 0.22, 0.76);
 
 #[derive(Component)]
 struct Collider;
@@ -118,7 +120,9 @@ pub struct GamePlugin;
 struct Brick(BrickColor);
 
 #[derive(Component)]
-struct PlayerBoard(BrickColor);
+struct PlayBoard;
+#[derive(Component)]
+struct PlayerScore(BrickColor);
 
 trait Player {
     const BREAK_COLOR: BrickColor;
@@ -127,6 +131,27 @@ trait Player {
     fn y(&self) -> f32;
     fn set_x(&mut self, x: f32);
     fn set_y(&mut self, y: f32);
+    fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>);
+}
+
+fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> Text2dBundle {
+    Text2dBundle {
+        text: Text::from_section(
+            msg,
+            TextStyle {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 42.0,
+                color: GAME_DATA_TEXT_COLOR,
+            },
+        )
+        .with_alignment(TextAlignment::Center),
+        transform: Transform {
+            translation: Vec3::new(x, y, 0.),
+            ..default()
+        },
+        text_anchor: Anchor::TopCenter,
+        ..default()
+    }
 }
 
 #[derive(Component)]
@@ -156,6 +181,27 @@ impl Player for RedPlayer {
     fn set_y(&mut self, y: f32) {
         self.y = y;
     }
+    fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+        const BOARD_LEFT_POS: f32 = (-MID_POS * BRICK_WIDTH - 80) as f32;
+        commands
+            .spawn((
+                SpriteBundle {
+                    transform: Transform::from_xyz(BOARD_LEFT_POS, 0., 0.),
+                    ..default()
+                },
+                PlayBoard,
+            ))
+            .with_children(|parent| {
+                let up_margin: f32 = 60.;
+                let top_y: f32 = 180.;
+                let x: f32 = -50.;
+
+                parent.spawn(create_text_bundle("RED SCORE", x, top_y, asset_server));
+                parent
+                    .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
+                    .insert(PlayerScore(BrickColor::Red));
+            });
+    }
 }
 
 #[derive(Component)]
@@ -179,6 +225,26 @@ impl Player for BluePlayer {
     fn set_y(&mut self, y: f32) {
         self.y = y;
     }
+    fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+        const BOARD_LEFT_POS: f32 = (MID_POS * BRICK_WIDTH + 200) as f32;
+        commands
+            .spawn((
+                SpriteBundle {
+                    transform: Transform::from_xyz(BOARD_LEFT_POS, 0., 0.),
+                    ..default()
+                },
+                PlayBoard,
+            ))
+            .with_children(|parent| {
+                let up_margin: f32 = 60.;
+                let top_y: f32 = 180.;
+                let x: f32 = -50.;
+                parent.spawn(create_text_bundle("BLUE SCORE", x, top_y, asset_server));
+                parent
+                    .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
+                    .insert(PlayerScore(BrickColor::Blue));
+            });
+    }
 }
 
 impl BluePlayer {
@@ -197,7 +263,7 @@ impl Plugin for GamePlugin {
             OnExit(GameState::Game),
             (
                 despawn_with_component::<Collider>,
-                despawn_with_component::<PlayerBoard>,
+                despawn_with_component::<PlayBoard>,
             ),
         )
         .add_systems(
@@ -207,6 +273,7 @@ impl Plugin for GamePlugin {
                 handle_move::<BluePlayer>,
                 check_collider::<RedPlayer>,
                 check_collider::<BluePlayer>,
+                handle_score_update,
             )
                 .chain()
                 .run_if(in_state(GameState::Game)),
@@ -214,7 +281,7 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn setup_basedata(mut commands: Commands) {
+fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
     for index_y in 0..BRICK_COUNT_WIDTH + 1 {
         let real_y = (index_y - MID_POS) * BRICK_WIDTH;
         for index_x in 0..BRICK_COUNT_WIDTH + 1 {
@@ -256,6 +323,8 @@ fn setup_basedata(mut commands: Commands) {
     commands.spawn(WallBundle::new(WallLocation::Right));
     commands.spawn(WallBundle::new(WallLocation::Bottom));
     commands.spawn(WallBundle::new(WallLocation::Top));
+    RedPlayer::place_board(&mut commands, &asset_server);
+    BluePlayer::place_board(&mut commands, &asset_server);
 }
 
 fn setup_player(
@@ -368,4 +437,14 @@ where
 
     player_trans.translation.x += state.x() * timer.delta().as_secs_f32();
     player_trans.translation.y += state.y() * timer.delta().as_secs_f32();
+}
+
+fn handle_score_update(
+    mut text_query: Query<(&mut Text, &PlayerScore), With<PlayerScore>>,
+    blocks: Query<&Brick>,
+) {
+    for (mut text, playerboard) in &mut text_query {
+        let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
+        text.sections[0].value = count.to_string();
+    }
 }
