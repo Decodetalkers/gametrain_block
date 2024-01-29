@@ -1,6 +1,6 @@
 mod common;
-mod game;
 mod menu;
+mod region_game;
 
 mod utils;
 use bevy::{prelude::*, window::WindowResolution};
@@ -29,7 +29,7 @@ fn main() {
         .add_systems(Startup, camera_setup)
         .add_state::<GameState>()
         .add_plugins(menu::MenuPlugin)
-        .add_plugins(game::GamePlugin)
+        .add_plugins(region_game::GamePlugin)
         .run()
 }
 
