@@ -6,7 +6,11 @@ use bevy::{
     },
 };
 
-use crate::{utils::despawn_with_component, GameState};
+use crate::{
+    common::{NORMAL_BUTTON, TEXT_COLOR},
+    utils::{common_button_system, despawn_with_component},
+    GameState,
+};
 
 const BRICK_WIDTH: i32 = 20;
 const BRICK_COUNT_WIDTH: i32 = 30;
@@ -35,6 +39,9 @@ struct WallBundle {
     sprite_bundle: SpriteBundle,
     collider: Collider,
 }
+
+#[derive(Component)]
+struct ReturnButton;
 
 /// Which side of the arena is this wall located on?
 enum WallLocation {
@@ -331,6 +338,7 @@ impl Plugin for GamePlugin {
             (
                 despawn_with_component::<Collider>,
                 despawn_with_component::<PlayBoard>,
+                despawn_with_component::<ReturnButton>,
             ),
         )
         .add_systems(
@@ -342,6 +350,12 @@ impl Plugin for GamePlugin {
                 check_collider::<BluePlayer>,
                 handle_score_update,
             )
+                .chain()
+                .run_if(in_state(GameState::Game)),
+        )
+        .add_systems(
+            Update,
+            (common_button_system, menu_action)
                 .chain()
                 .run_if(in_state(GameState::Game)),
         );
@@ -392,6 +406,42 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(WallBundle::new(WallLocation::Top));
     RedPlayer::place_board(&mut commands, &asset_server);
     BluePlayer::place_board(&mut commands, &asset_server);
+    commands
+        .spawn((
+            ButtonBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(10.0),
+                    left: Val::Px(10.),
+                    ..default()
+                },
+                background_color: NORMAL_BUTTON.into(),
+                ..default()
+            },
+            ReturnButton,
+        ))
+        .with_children(|parent| {
+            let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+            let button_icon_style = Style {
+                width: Val::Px(30.0),
+                height: Val::Auto,
+                position_type: PositionType::Relative,
+                ..default()
+            };
+            let button_text_style = TextStyle {
+                font: font.clone(),
+                font_size: 40.0,
+                color: TEXT_COLOR,
+            };
+
+            let icon = asset_server.load("right.png");
+            parent.spawn(ImageBundle {
+                style: button_icon_style,
+                image: UiImage::new(icon),
+                ..default()
+            });
+            parent.spawn(TextBundle::from_section("GoBack", button_text_style));
+        });
 }
 
 fn setup_player(
@@ -467,5 +517,16 @@ fn handle_score_update(
     for (mut text, playerboard) in &mut text_query {
         let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
         text.sections[0].value = count.to_string();
+    }
+}
+
+fn menu_action(
+    interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+    mut game_state: ResMut<NextState<GameState>>,
+) {
+    for interaction in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            game_state.set(GameState::Menu);
+        }
     }
 }

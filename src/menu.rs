@@ -16,7 +16,10 @@ impl Plugin for MenuPlugin {
             despawn_with_component::<OnMainMenuScreen>,
         )
         .add_systems(OnEnter(GameState::Menu), main_menu_setup)
-        .add_systems(Update, (common_button_system, menu_action));
+        .add_systems(
+            Update,
+            (common_button_system, menu_action).run_if(in_state(GameState::Menu)),
+        );
     }
 }
 #[derive(Component)]
