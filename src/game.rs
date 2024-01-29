@@ -117,6 +117,9 @@ pub struct GamePlugin;
 #[derive(Component)]
 struct Brick(BrickColor);
 
+#[derive(Component)]
+struct PlayerBoard(BrickColor);
+
 trait Player {
     const BREAK_COLOR: BrickColor;
     const RENDER_COLOR: Color;
@@ -190,7 +193,13 @@ impl Plugin for GamePlugin {
             OnEnter(GameState::Game),
             (setup_basedata, setup_player).chain(),
         )
-        .add_systems(OnExit(GameState::Game), despawn_with_component::<Collider>)
+        .add_systems(
+            OnExit(GameState::Game),
+            (
+                despawn_with_component::<Collider>,
+                despawn_with_component::<PlayerBoard>,
+            ),
+        )
         .add_systems(
             FixedUpdate,
             (
