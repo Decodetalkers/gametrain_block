@@ -4,7 +4,9 @@ mod menu;
 
 mod utils;
 use bevy::{prelude::*, window::WindowResolution};
-use common::{WINDOW_HEIGHT, WINDOW_WIDTH};
+
+const WINDOW_WIDTH: f32 = 1100.;
+const WINDOW_HEIGHT: f32 = 1000.;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, States)]
 enum GameState {
