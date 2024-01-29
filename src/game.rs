@@ -97,6 +97,7 @@ impl WallBundle {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 enum BrickColor {
     Red,
     Blue,
@@ -116,16 +117,19 @@ pub struct GamePlugin;
 #[derive(Component)]
 struct Brick(BrickColor);
 
-#[derive(Component)]
-struct RedPlayer {
-    x: f32,
-    y: f32,
-}
 trait Player {
+    const BREAK_COLOR: BrickColor;
+    const RENDER_COLOR: Color;
     fn x(&self) -> f32;
     fn y(&self) -> f32;
     fn set_x(&mut self, x: f32);
     fn set_y(&mut self, y: f32);
+}
+
+#[derive(Component)]
+struct RedPlayer {
+    x: f32,
+    y: f32,
 }
 
 impl RedPlayer {
@@ -133,7 +137,10 @@ impl RedPlayer {
         Self { x: 100., y: 100. }
     }
 }
+
 impl Player for RedPlayer {
+    const BREAK_COLOR: BrickColor = BrickColor::Red;
+    const RENDER_COLOR: Color = Color::TOMATO;
     fn x(&self) -> f32 {
         self.x
     }
@@ -155,6 +162,8 @@ struct BluePlayer {
 }
 
 impl Player for BluePlayer {
+    const BREAK_COLOR: BrickColor = BrickColor::Blue;
+    const RENDER_COLOR: Color = Color::GRAY;
     fn x(&self) -> f32 {
         self.x
     }
@@ -187,7 +196,8 @@ impl Plugin for GamePlugin {
             (
                 handle_move::<RedPlayer>,
                 handle_move::<BluePlayer>,
-                check_collider,
+                check_collider::<RedPlayer>,
+                check_collider::<BluePlayer>,
             )
                 .chain()
                 .run_if(in_state(GameState::Game)),
@@ -294,13 +304,14 @@ fn setup_player(
     ));
 }
 
-fn check_collider(
+fn check_collider<P>(
     mut blocks: Query<(&Transform, &mut Sprite, &mut Brick)>,
     walls: Query<&Transform, With<Collider>>,
-    mut red: Query<(&Transform, &mut RedPlayer), Without<Brick>>,
-    mut blue: Query<(&Transform, &mut BluePlayer), Without<Brick>>,
-) {
-    let (red_tran, mut red_state) = red.single_mut();
+    mut player: Query<(&Transform, &mut P), With<P>>,
+) where
+    P: Player + Component,
+{
+    let (red_tran, mut red_state) = player.single_mut();
     for (transform, mut spite, mut block) in &mut blocks {
         if let Some(coll) = collide(
             red_tran.translation,
@@ -308,14 +319,16 @@ fn check_collider(
             transform.translation,
             transform.scale.truncate(),
         ) {
-            if let BrickColor::Red = block.0 {
+            let x = red_state.x();
+            let y = red_state.y();
+            if block.0 == P::BREAK_COLOR {
                 match coll {
-                    Collision::Left | Collision::Right => red_state.x = -red_state.x,
-                    Collision::Top | Collision::Bottom => red_state.y = -red_state.y,
+                    Collision::Left | Collision::Right => red_state.set_x(-x),
+                    Collision::Top | Collision::Bottom => red_state.set_y(-y),
                     Collision::Inside => { /* do nothing */ }
                 }
 
-                spite.color = Color::TOMATO;
+                spite.color = P::RENDER_COLOR;
                 block.0.change();
             }
         }
@@ -327,42 +340,11 @@ fn check_collider(
             transform.translation,
             transform.scale.truncate(),
         ) {
+            let x = red_state.x();
+            let y = red_state.y();
             match coll {
-                Collision::Left | Collision::Right => red_state.x = -red_state.x,
-                Collision::Top | Collision::Bottom => red_state.y = -red_state.y,
-                Collision::Inside => { /* do nothing */ }
-            }
-        }
-    }
-    let (blue_tran, mut blue_state) = blue.single_mut();
-    for (transform, mut spite, mut block) in &mut blocks {
-        if let Some(coll) = collide(
-            blue_tran.translation,
-            blue_tran.scale.truncate(),
-            transform.translation,
-            transform.scale.truncate(),
-        ) {
-            if let BrickColor::Blue = block.0 {
-                match coll {
-                    Collision::Left | Collision::Right => blue_state.x = -blue_state.x,
-                    Collision::Top | Collision::Bottom => blue_state.y = -blue_state.y,
-                    Collision::Inside => { /* do nothing */ }
-                }
-                spite.color = Color::GRAY;
-                block.0.change();
-            }
-        }
-    }
-    for transform in &walls {
-        if let Some(coll) = collide(
-            blue_tran.translation,
-            blue_tran.scale.truncate(),
-            transform.translation,
-            transform.scale.truncate(),
-        ) {
-            match coll {
-                Collision::Left | Collision::Right => blue_state.x = -blue_state.x,
-                Collision::Top | Collision::Bottom => blue_state.y = -blue_state.y,
+                Collision::Left | Collision::Right => red_state.set_x(-x),
+                Collision::Top | Collision::Bottom => red_state.set_y(-y),
                 Collision::Inside => { /* do nothing */ }
             }
         }
