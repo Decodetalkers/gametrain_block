@@ -7,7 +7,7 @@ use bevy::{
 };
 
 use crate::{
-    common::{NORMAL_BUTTON, TEXT_COLOR},
+    common::{FIRASANS_FONT, NORMAL_BUTTON, TEXT_COLOR},
     utils::{common_button_system, despawn_with_component},
     GameState,
 };
@@ -151,7 +151,7 @@ fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>
         text: Text::from_section(
             msg,
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: asset_server.load(FIRASANS_FONT),
                 font_size: 42.0,
                 color: GAME_DATA_TEXT_COLOR,
             },
@@ -422,7 +422,7 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
             ReturnButton,
         ))
         .with_children(|parent| {
-            let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+            let font = asset_server.load(FIRASANS_FONT);
             let button_icon_style = Style {
                 width: Val::Px(30.0),
                 height: Val::Auto,

@@ -41,7 +41,7 @@ impl EntitySpawner for ChildBuilder<'_, '_, '_> {
         title: &str,
         asset_server: &Res<AssetServer>,
     ) {
-        let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+        let font = asset_server.load(FIRASANS_FONT);
         let button_style = Style {
             width: Val::Px(250.0),
             height: Val::Px(95.0),

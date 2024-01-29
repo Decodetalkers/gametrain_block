@@ -35,7 +35,7 @@ enum MenuButtonAction {
 struct OnMainMenuScreen;
 
 fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let font = asset_server.load(FIRASANS_FONT);
 
     commands
         .spawn((

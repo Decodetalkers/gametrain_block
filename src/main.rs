@@ -21,7 +21,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "hello".to_string(),
+                title: "games collections".to_string(),
                 resizable: false,
                 resolution: WindowResolution::new(WINDOW_WIDTH, WINDOW_HEIGHT),
                 ..default()

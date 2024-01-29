@@ -1,14 +1,13 @@
 use bevy::prelude::*;
 
 use crate::{
-    common::{NORMAL_BUTTON, TEXT_COLOR},
+    common::{FIRASANS_FONT, NORMAL_BUTTON, TEXT_COLOR},
     utils::{common_button_system, despawn_with_component},
     GameState,
 };
 
 pub struct RpsGamePlugin;
 
-#[allow(unused)]
 impl Plugin for RpsGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::RpsGame), setup_basedata)
@@ -24,6 +23,7 @@ impl Plugin for RpsGamePlugin {
             );
     }
 }
+
 #[derive(Component)]
 struct ReturnButton;
 
@@ -43,7 +43,7 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
             ReturnButton,
         ))
         .with_children(|parent| {
-            let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+            let font = asset_server.load(FIRASANS_FONT);
             let button_icon_style = Style {
                 width: Val::Px(30.0),
                 height: Val::Auto,
