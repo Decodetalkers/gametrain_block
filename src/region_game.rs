@@ -336,6 +336,7 @@ impl Plugin for GamePlugin {
         .add_systems(
             OnExit(GameState::Game),
             (
+                despawn_with_component::<Brick>,
                 despawn_with_component::<Collider>,
                 despawn_with_component::<PlayBoard>,
                 despawn_with_component::<ReturnButton>,
