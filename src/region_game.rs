@@ -132,6 +132,11 @@ trait Player {
     fn set_x(&mut self, x: f32);
     fn set_y(&mut self, y: f32);
     fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>);
+    fn place_player(
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
+    );
 }
 
 fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> Text2dBundle {
@@ -202,6 +207,36 @@ impl Player for RedPlayer {
                     .insert(PlayerScore(BrickColor::Red));
             });
     }
+    fn place_player(
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
+    ) {
+        const LEN: i32 = BRICK_COUNT_WIDTH / 4;
+        const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
+        commands.spawn((
+            MaterialMesh2dBundle {
+                mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+                material: materials.add(ColorMaterial::from(Color::PURPLE)),
+                transform: Transform {
+                    translation: Vec3 {
+                        x: RED_X as f32,
+                        y: 0.,
+                        z: 1.,
+                    },
+                    scale: Vec3 {
+                        x: 1.,
+                        y: 1.,
+                        z: 2.,
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            RedPlayer::new(),
+            Collider,
+        ));
+    }
 }
 
 #[derive(Component)]
@@ -244,6 +279,38 @@ impl Player for BluePlayer {
                     .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
                     .insert(PlayerScore(BrickColor::Blue));
             });
+    }
+
+    fn place_player(
+        commands: &mut Commands,
+        meshes: &mut ResMut<Assets<Mesh>>,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
+    ) {
+        const LEN: i32 = BRICK_COUNT_WIDTH / 4;
+        const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
+        const BLUE_X: i32 = -RED_X;
+        commands.spawn((
+            MaterialMesh2dBundle {
+                mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+                material: materials.add(ColorMaterial::from(Color::PINK)),
+                transform: Transform {
+                    translation: Vec3 {
+                        x: BLUE_X as f32,
+                        y: 0.,
+                        z: 1.,
+                    },
+                    scale: Vec3 {
+                        x: 1.,
+                        y: 1.,
+                        z: 2.,
+                    },
+                    ..default()
+                },
+                ..default()
+            },
+            BluePlayer::new(),
+            Collider,
+        ));
     }
 }
 
@@ -332,54 +399,8 @@ fn setup_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    const LEN: i32 = BRICK_COUNT_WIDTH / 4;
-    const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
-    const BLUE_X: i32 = -RED_X;
-
-    commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-            material: materials.add(ColorMaterial::from(Color::PURPLE)),
-            transform: Transform {
-                translation: Vec3 {
-                    x: RED_X as f32,
-                    y: 0.,
-                    z: 1.,
-                },
-                scale: Vec3 {
-                    x: 1.,
-                    y: 1.,
-                    z: 2.,
-                },
-                ..default()
-            },
-            ..default()
-        },
-        RedPlayer::new(),
-        Collider,
-    ));
-    commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-            material: materials.add(ColorMaterial::from(Color::PINK)),
-            transform: Transform {
-                translation: Vec3 {
-                    x: BLUE_X as f32,
-                    y: 0.,
-                    z: 1.,
-                },
-                scale: Vec3 {
-                    x: 1.,
-                    y: 1.,
-                    z: 2.,
-                },
-                ..default()
-            },
-            ..default()
-        },
-        BluePlayer::new(),
-        Collider,
-    ));
+    RedPlayer::place_player(&mut commands, &mut meshes, &mut materials);
+    BluePlayer::place_player(&mut commands, &mut meshes, &mut materials);
 }
 
 fn check_collider<P>(
