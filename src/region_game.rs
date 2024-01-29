@@ -121,7 +121,7 @@ impl BrickColor {
     }
 }
 
-pub struct GamePlugin;
+pub struct RegionGamePlugin;
 
 #[derive(Component)]
 struct Brick(BrickColor);
@@ -327,14 +327,14 @@ impl BluePlayer {
     }
 }
 
-impl Plugin for GamePlugin {
+impl Plugin for RegionGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            OnEnter(GameState::Game),
+            OnEnter(GameState::RegionGame),
             (setup_basedata, setup_player).chain(),
         )
         .add_systems(
-            OnExit(GameState::Game),
+            OnExit(GameState::RegionGame),
             (
                 despawn_with_component::<Brick>,
                 despawn_with_component::<Collider>,
@@ -352,13 +352,13 @@ impl Plugin for GamePlugin {
                 handle_score_update,
             )
                 .chain()
-                .run_if(in_state(GameState::Game)),
+                .run_if(in_state(GameState::RegionGame)),
         )
         .add_systems(
             Update,
             (common_button_system, menu_action)
                 .chain()
-                .run_if(in_state(GameState::Game)),
+                .run_if(in_state(GameState::RegionGame)),
         );
     }
 }

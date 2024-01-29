@@ -120,7 +120,6 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-#[allow(clippy::single_match)]
 #[allow(clippy::type_complexity)]
 fn menu_action(
     interaction_query: Query<
@@ -132,7 +131,8 @@ fn menu_action(
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
-                MenuButtonAction::RegionBattle => game_state.set(GameState::Game),
+                MenuButtonAction::RegionBattle => game_state.set(GameState::RegionGame),
+                MenuButtonAction::RPSBattle => game_state.set(GameState::RpsGame),
                 _ => {}
             }
         }

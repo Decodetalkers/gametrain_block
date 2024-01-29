@@ -1,6 +1,7 @@
 mod common;
 mod menu;
 mod region_game;
+mod rps_game;
 
 mod utils;
 use bevy::{prelude::*, window::WindowResolution};
@@ -12,7 +13,8 @@ const WINDOW_HEIGHT: f32 = 1000.;
 enum GameState {
     #[default]
     Menu,
-    Game,
+    RegionGame,
+    RpsGame,
 }
 
 fn main() {
@@ -29,7 +31,8 @@ fn main() {
         .add_systems(Startup, camera_setup)
         .add_state::<GameState>()
         .add_plugins(menu::MenuPlugin)
-        .add_plugins(region_game::GamePlugin)
+        .add_plugins(region_game::RegionGamePlugin)
+        .add_plugins(rps_game::RpsGamePlugin)
         .run()
 }
 
