@@ -410,7 +410,7 @@ fn check_collider<P>(
 ) where
     P: Player + Component,
 {
-    let (red_tran, mut red_state) = player.single_mut();
+    let (red_tran, mut player_state) = player.single_mut();
     for (transform, mut spite, mut block) in &mut blocks {
         if let Some(coll) = collide(
             red_tran.translation,
@@ -418,12 +418,12 @@ fn check_collider<P>(
             transform.translation,
             transform.scale.truncate(),
         ) {
-            let x = red_state.x();
-            let y = red_state.y();
+            let x = player_state.x();
+            let y = player_state.y();
             if block.0 == P::BREAK_COLOR {
                 match coll {
-                    Collision::Left | Collision::Right => red_state.set_x(-x),
-                    Collision::Top | Collision::Bottom => red_state.set_y(-y),
+                    Collision::Left | Collision::Right => player_state.set_x(-x),
+                    Collision::Top | Collision::Bottom => player_state.set_y(-y),
                     Collision::Inside => { /* do nothing */ }
                 }
 
@@ -439,11 +439,11 @@ fn check_collider<P>(
             transform.translation,
             transform.scale.truncate(),
         ) {
-            let x = red_state.x();
-            let y = red_state.y();
+            let x = player_state.x();
+            let y = player_state.y();
             match coll {
-                Collision::Left | Collision::Right => red_state.set_x(-x),
-                Collision::Top | Collision::Bottom => red_state.set_y(-y),
+                Collision::Left | Collision::Right => player_state.set_x(-x),
+                Collision::Top | Collision::Bottom => player_state.set_y(-y),
                 Collision::Inside => { /* do nothing */ }
             }
         }
