@@ -112,15 +112,6 @@ enum BrickColor {
     Blue,
 }
 
-impl BrickColor {
-    fn change(&mut self) {
-        match self {
-            Self::Red => *self = Self::Blue,
-            Self::Blue => *self = Self::Red,
-        }
-    }
-}
-
 pub struct RegionGamePlugin;
 
 #[derive(Component)]
@@ -211,7 +202,7 @@ impl Player for RedPlayer {
                 parent.spawn(create_text_bundle("RED SCORE", x, top_y, asset_server));
                 parent
                     .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
-                    .insert(PlayerScore(BrickColor::Red));
+                    .insert(PlayerScore(Self::BREAK_COLOR));
             });
     }
     fn place_player(
@@ -284,7 +275,7 @@ impl Player for BluePlayer {
                 parent.spawn(create_text_bundle("BLUE SCORE", x, top_y, asset_server));
                 parent
                     .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
-                    .insert(PlayerScore(BrickColor::Blue));
+                    .insert(PlayerScore(Self::BREAK_COLOR));
             });
     }
 
@@ -394,9 +385,9 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..default()
                 },
                 Brick(if real_x > 0 {
-                    BrickColor::Red
-                } else {
                     BrickColor::Blue
+                } else {
+                    BrickColor::Red
                 }),
             ));
         }
@@ -461,17 +452,17 @@ fn check_collider<P>(
 ) where
     P: Player + Component,
 {
-    let (red_tran, mut player_state) = player.single_mut();
+    let (player_tran, mut player_state) = player.single_mut();
     for (transform, mut spite, mut block) in &mut blocks {
         if let Some(coll) = collide(
-            red_tran.translation,
-            red_tran.scale.truncate(),
+            player_tran.translation,
+            player_tran.scale.truncate(),
             transform.translation,
             transform.scale.truncate(),
         ) {
             let x = player_state.x();
             let y = player_state.y();
-            if block.0 == P::BREAK_COLOR {
+            if block.0 != P::BREAK_COLOR {
                 match coll {
                     Collision::Left | Collision::Right => player_state.set_x(-x),
                     Collision::Top | Collision::Bottom => player_state.set_y(-y),
@@ -479,14 +470,14 @@ fn check_collider<P>(
                 }
 
                 spite.color = P::RENDER_COLOR;
-                block.0.change();
+                block.0 = P::BREAK_COLOR;
             }
         }
     }
     for transform in &walls {
         if let Some(coll) = collide(
-            red_tran.translation,
-            red_tran.scale.truncate(),
+            player_tran.translation,
+            player_tran.scale.truncate(),
             transform.translation,
             transform.scale.truncate(),
         ) {
