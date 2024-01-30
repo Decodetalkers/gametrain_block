@@ -232,7 +232,6 @@ impl Player for RedPlayer {
                 ..default()
             },
             RedPlayer::new(),
-            Collider,
         ));
     }
 }
@@ -307,7 +306,6 @@ impl Player for BluePlayer {
                 ..default()
             },
             BluePlayer::new(),
-            Collider,
         ));
     }
 }
@@ -331,6 +329,8 @@ impl Plugin for RegionGamePlugin {
                 despawn_with_component::<Collider>,
                 despawn_with_component::<PlayBoard>,
                 despawn_with_component::<ReturnButton>,
+                despawn_with_component::<RedPlayer>,
+                despawn_with_component::<BluePlayer>,
             ),
         )
         .add_systems(
