@@ -363,9 +363,9 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
                 SpriteBundle {
                     sprite: Sprite {
                         color: if real_x > 0 {
-                            Color::GRAY
+                            Color::BLACK
                         } else {
-                            Color::TOMATO
+                            Color::WHITE
                         },
                         ..default()
                     },

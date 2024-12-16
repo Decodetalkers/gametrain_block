@@ -29,7 +29,7 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, camera_setup)
-        .add_state::<GameState>()
+        .add_sub_state::<GameState>()
         .add_plugins(menu::MenuPlugin)
         .add_plugins(region_game::RegionGamePlugin)
         .add_plugins(rps_game::RpsGamePlugin)
