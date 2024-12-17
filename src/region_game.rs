@@ -1,9 +1,7 @@
 use bevy::{
+    math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume},
     prelude::*,
-    sprite::{
-        collide_aabb::{collide, Collision},
-        Anchor, MaterialMesh2dBundle,
-    },
+    sprite::{Anchor, MaterialMesh2dBundle},
 };
 
 use crate::{
@@ -17,7 +15,7 @@ const BRICK_COUNT_WIDTH: i32 = 30;
 
 const MID_POS: i32 = BRICK_COUNT_WIDTH / 2;
 
-const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+const WALL_COLOR: Color = Color::srgb(0.8, 0.8, 0.8);
 
 const WALL_THICKNESS: f32 = 40.0;
 // x coordinates
@@ -27,7 +25,7 @@ const RIGHT_WALL: f32 = -1. * LEFT_WALL;
 const BOTTOM_WALL: f32 = LEFT_WALL;
 const TOP_WALL: f32 = RIGHT_WALL;
 
-const GAME_DATA_TEXT_COLOR: Color = Color::rgb(0., 0.22, 0.76);
+const GAME_DATA_TEXT_COLOR: Color = Color::srgb(0., 0.22, 0.76);
 
 #[derive(Component)]
 struct Collider;
@@ -137,24 +135,16 @@ trait Player {
     );
 }
 
-fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> Text2dBundle {
-    Text2dBundle {
-        text: Text::from_section(
-            msg,
-            TextStyle {
-                font: asset_server.load(FIRASANS_FONT),
-                font_size: 42.0,
-                color: GAME_DATA_TEXT_COLOR,
-            },
-        )
-        .with_alignment(TextAlignment::Center),
-        transform: Transform {
-            translation: Vec3::new(x, y, 0.),
-            ..default()
+fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> impl Bundle {
+    (
+        Text(msg.to_string()),
+        TextFont {
+            font: asset_server.load(FIRASANS_FONT),
+            font_size: 42.0,
+            ..Default::default()
         },
-        text_anchor: Anchor::TopCenter,
-        ..default()
-    }
+        TextColor(GAME_DATA_TEXT_COLOR),
+    )
 }
 
 #[derive(Component)]
@@ -171,7 +161,7 @@ impl RedPlayer {
 
 impl Player for RedPlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Red;
-    const RENDER_COLOR: Color = Color::TOMATO;
+    const RENDER_COLOR: Color = Color::BLACK;
     fn x(&self) -> f32 {
         self.x
     }
@@ -213,24 +203,24 @@ impl Player for RedPlayer {
         const LEN: i32 = BRICK_COUNT_WIDTH / 4;
         const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
         commands.spawn((
-            MaterialMesh2dBundle {
-                mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-                material: materials.add(ColorMaterial::from(Color::PURPLE)),
-                transform: Transform {
-                    translation: Vec3 {
-                        x: RED_X as f32,
-                        y: 0.,
-                        z: 1.,
-                    },
-                    scale: Vec3 {
-                        x: 1.,
-                        y: 1.,
-                        z: 2.,
-                    },
-                    ..default()
-                },
-                ..default()
-            },
+            //MaterialMesh2dBundle {
+            //    //mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+            //    //material: materials.add(ColorMaterial::from(Color::PURPLE)),
+            //    transform: Transform {
+            //        translation: Vec3 {
+            //            x: RED_X as f32,
+            //            y: 0.,
+            //            z: 1.,
+            //        },
+            //        scale: Vec3 {
+            //            x: 1.,
+            //            y: 1.,
+            //            z: 2.,
+            //        },
+            //        ..default()
+            //    },
+            //    ..default()
+            //},
             RedPlayer::new(),
         ));
     }
@@ -244,7 +234,7 @@ struct BluePlayer {
 
 impl Player for BluePlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Blue;
-    const RENDER_COLOR: Color = Color::GRAY;
+    const RENDER_COLOR: Color = Color::BLACK;
     fn x(&self) -> f32 {
         self.x
     }
@@ -286,25 +276,26 @@ impl Player for BluePlayer {
         const LEN: i32 = BRICK_COUNT_WIDTH / 4;
         const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
         const BLUE_X: i32 = -RED_X;
+        // TODO: fix it
         commands.spawn((
-            MaterialMesh2dBundle {
-                mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-                material: materials.add(ColorMaterial::from(Color::PINK)),
-                transform: Transform {
-                    translation: Vec3 {
-                        x: BLUE_X as f32,
-                        y: 0.,
-                        z: 1.,
-                    },
-                    scale: Vec3 {
-                        x: 1.,
-                        y: 1.,
-                        z: 2.,
-                    },
-                    ..default()
-                },
-                ..default()
-            },
+            //MaterialMesh2dBundle {
+            //    //mesh: meshes.add(shape::Circle::new(10.).into()).into(),
+            //    //material: materials.add(ColorMaterial::from(Color::BLACK)),
+            //    transform: Transform {
+            //        translation: Vec3 {
+            //            x: BLUE_X as f32,
+            //            y: 0.,
+            //            z: 1.,
+            //        },
+            //        scale: Vec3 {
+            //            x: 1.,
+            //            y: 1.,
+            //            z: 2.,
+            //        },
+            //        ..default()
+            //    },
+            //    ..default()
+            //},
             BluePlayer::new(),
         ));
     }
@@ -340,7 +331,7 @@ impl Plugin for RegionGamePlugin {
                 handle_move::<BluePlayer>,
                 check_collider::<RedPlayer>,
                 check_collider::<BluePlayer>,
-                handle_score_update,
+                //handle_score_update,
             )
                 .chain()
                 .run_if(in_state(GameState::RegionGame)),
@@ -401,38 +392,43 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             ButtonBundle {
-                style: Style {
+                background_color: NORMAL_BUTTON.into(),
+                node: Node {
                     position_type: PositionType::Absolute,
                     top: Val::Px(10.0),
                     left: Val::Px(10.),
                     ..default()
                 },
-                background_color: NORMAL_BUTTON.into(),
                 ..default()
             },
             ReturnButton,
         ))
         .with_children(|parent| {
             let font = asset_server.load(FIRASANS_FONT);
-            let button_icon_style = Style {
+            let button_icon_style = Node {
                 width: Val::Px(30.0),
                 height: Val::Auto,
                 position_type: PositionType::Relative,
                 ..default()
             };
-            let button_text_style = TextStyle {
+            let button_text_style = TextFont {
                 font: font.clone(),
                 font_size: 40.0,
-                color: TEXT_COLOR,
+                ..Default::default()
             };
 
-            let icon = asset_server.load("right.png");
-            parent.spawn(ImageBundle {
-                style: button_icon_style,
-                image: UiImage::new(icon),
-                ..default()
-            });
-            parent.spawn(TextBundle::from_section("GoBack", button_text_style));
+            let image = asset_server.load("right.png");
+            parent.spawn((
+                ImageNode {
+                    image,
+                    ..Default::default()
+                },
+                button_icon_style,
+            ));
+            parent.spawn((
+                (Text::new("GoBack"), button_text_style),
+                TextColor(TEXT_COLOR),
+            ));
         });
 }
 
@@ -444,6 +440,37 @@ fn setup_player(
     RedPlayer::place_player(&mut commands, &mut meshes, &mut materials);
     BluePlayer::place_player(&mut commands, &mut meshes, &mut materials);
 }
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+enum Collision {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+// Returns `Some` if `ball` collides with `bounding_box`.
+// The returned `Collision` is the side of `bounding_box` that `ball` hit.
+fn ball_collision(ball: BoundingCircle, bounding_box: Aabb2d) -> Option<Collision> {
+    if !ball.intersects(&bounding_box) {
+        return None;
+    }
+
+    let closest = bounding_box.closest_point(ball.center());
+    let offset: Vec2 = ball.center() - closest;
+    let side = if offset.x.abs() > offset.y.abs() {
+        if offset.x < 0. {
+            Collision::Left
+        } else {
+            Collision::Right
+        }
+    } else if offset.y > 0. {
+        Collision::Top
+    } else {
+        Collision::Bottom
+    };
+
+    Some(side)
+}
 
 fn check_collider<P>(
     mut blocks: Query<(&Transform, &mut Sprite, &mut Brick)>,
@@ -454,11 +481,12 @@ fn check_collider<P>(
 {
     let (player_tran, mut player_state) = player.single_mut();
     for (transform, mut spite, mut block) in &mut blocks {
-        if let Some(coll) = collide(
-            player_tran.translation,
-            player_tran.scale.truncate(),
-            transform.translation,
-            transform.scale.truncate(),
+        if let Some(coll) = ball_collision(
+            BoundingCircle::new(player_tran.translation.truncate(), 20. / 2.0),
+            Aabb2d::new(
+                transform.translation.truncate(),
+                transform.scale.truncate() / 2.0,
+            ),
         ) {
             let x = player_state.x();
             let y = player_state.y();
@@ -466,7 +494,6 @@ fn check_collider<P>(
                 match coll {
                     Collision::Left | Collision::Right => player_state.set_x(-x),
                     Collision::Top | Collision::Bottom => player_state.set_y(-y),
-                    Collision::Inside => { /* do nothing */ }
                 }
 
                 spite.color = P::RENDER_COLOR;
@@ -475,18 +502,18 @@ fn check_collider<P>(
         }
     }
     for transform in &walls {
-        if let Some(coll) = collide(
-            player_tran.translation,
-            player_tran.scale.truncate(),
-            transform.translation,
-            transform.scale.truncate(),
+        if let Some(coll) = ball_collision(
+            BoundingCircle::new(player_tran.translation.truncate(), 20. / 2.0),
+            Aabb2d::new(
+                transform.translation.truncate(),
+                transform.scale.truncate() / 2.0,
+            ),
         ) {
             let x = player_state.x();
             let y = player_state.y();
             match coll {
                 Collision::Left | Collision::Right => player_state.set_x(-x),
                 Collision::Top | Collision::Bottom => player_state.set_y(-y),
-                Collision::Inside => { /* do nothing */ }
             }
         }
     }
@@ -496,21 +523,22 @@ fn handle_move<P>(mut blue_query: Query<(&mut Transform, &P), With<P>>, timer: R
 where
     P: Player + Component,
 {
+    // TODO: place the player
     let (mut player_trans, state) = blue_query.single_mut();
 
     player_trans.translation.x += state.x() * timer.delta().as_secs_f32();
     player_trans.translation.y += state.y() * timer.delta().as_secs_f32();
 }
 
-fn handle_score_update(
-    mut text_query: Query<(&mut Text, &PlayerScore), With<PlayerScore>>,
-    blocks: Query<&Brick>,
-) {
-    for (mut text, playerboard) in &mut text_query {
-        let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
-        text.sections[0].value = count.to_string();
-    }
-}
+//fn handle_score_update(
+//    mut text_query: Query<(&mut Text, &PlayerScore), With<PlayerScore>>,
+//    blocks: Query<&Brick>,
+//) {
+//    for (mut text, playerboard) in &mut text_query {
+//        let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
+//        text.sections[0].value = count.to_string();
+//    }
+//}
 
 fn menu_action(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>)>,

@@ -39,46 +39,41 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
             OnMainMenuScreen,
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         padding: UiRect::px(120., 120., 10., 30.),
                         ..default()
                     },
-                    background_color: BACKGROUND.into(),
-                    ..default()
-                })
+                    TextColor(BACKGROUND.into()),
+                ))
                 .with_children(|parent| {
                     // Display the game name
-                    parent.spawn(
-                        TextBundle::from_section(
-                            "GAMES COLLICATION",
-                            TextStyle {
-                                font: font.clone(),
-                                font_size: 80.0,
-                                color: TEXT_COLOR,
-                            },
-                        )
-                        .with_style(Style {
+                    parent.spawn((
+                        Text::new("GAMES COLLICATION"),
+                        TextFont {
+                            font: font.clone(),
+                            font_size: 80.0,
+                            ..Default::default()
+                        },
+                        TextColor(TEXT_COLOR),
+                        Node {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
-                        }),
-                    );
+                        },
+                    ));
 
                     // Display three buttons for each action available from the main menu:
                     // - Easy Mode

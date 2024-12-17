@@ -30,39 +30,45 @@ struct ReturnButton;
 fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
-            ButtonBundle {
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    top: Val::Px(10.0),
-                    left: Val::Px(10.),
-                    ..default()
-                },
-                background_color: NORMAL_BUTTON.into(),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(10.0),
+                left: Val::Px(10.),
                 ..default()
             },
+            TextColor(NORMAL_BUTTON),
             ReturnButton,
         ))
         .with_children(|parent| {
             let font = asset_server.load(FIRASANS_FONT);
-            let button_icon_style = Style {
+            let button_icon_style = Node {
                 width: Val::Px(30.0),
                 height: Val::Auto,
                 position_type: PositionType::Relative,
                 ..default()
             };
-            let button_text_style = TextStyle {
+            let button_text_style = TextFont {
                 font: font.clone(),
                 font_size: 40.0,
-                color: TEXT_COLOR,
+                ..Default::default()
             };
 
-            let icon = asset_server.load("right.png");
-            parent.spawn(ImageBundle {
-                style: button_icon_style,
-                image: UiImage::new(icon),
-                ..default()
-            });
-            parent.spawn(TextBundle::from_section("GoBack", button_text_style));
+            let image = asset_server.load("right.png");
+            parent.spawn((
+                ImageBundle {
+                    image: ImageNode {
+                        image,
+                        ..Default::default()
+                    },
+                    ..default()
+                },
+                button_text_style.clone(),
+            ));
+            parent.spawn((
+                Text::new("GoBack"),
+                button_text_style,
+                TextColor(TEXT_COLOR),
+            ));
         });
 }
 
