@@ -132,20 +132,6 @@ trait Player {
     );
 }
 
-fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> impl Bundle {
-    (
-        Text::new(msg),
-        TextFont {
-            font: asset_server.load(FIRASANS_FONT),
-            font_size: 42.0,
-
-            ..Default::default()
-        },
-        Transform::from_xyz(x, y, 0.),
-        TextColor(GAME_DATA_TEXT_COLOR),
-    )
-}
-
 #[derive(Component)]
 struct RedPlayer {
     x: f32,
@@ -176,13 +162,26 @@ impl Player for RedPlayer {
         self.y = y;
     }
     fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
-        const BOARD_LEFT_POS: f32 = (-MID_POS * BRICK_WIDTH - 80) as f32;
-        let up_margin: f32 = 60.;
-        let top_y: f32 = 180.;
-        let x: f32 = -50.;
         commands
             .spawn((
                 Text::new("RED SCORE"),
+                TextFont {
+                    font: asset_server.load(FIRASANS_FONT),
+                    font_size: 20.0,
+                    ..Default::default()
+                },
+                TextColor(GAME_DATA_TEXT_COLOR),
+                Node {
+                    align_self: AlignSelf::Start,
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(10.),
+                    top: Val::Px(470.0),
+                    ..Default::default()
+                },
+                PlayBoard,
+            ))
+            .with_child((
+                Text::new("0"),
                 TextFont {
                     font: asset_server.load(FIRASANS_FONT),
                     font_size: 42.0,
@@ -190,18 +189,13 @@ impl Player for RedPlayer {
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
                 Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(10.),
-                    top: Val::Px(30.0),
+                    align_content: AlignContent::Center,
+                    position_type: PositionType::Relative,
+                    top: Val::Px(50.0),
                     ..Default::default()
                 },
-                PlayBoard,
-            ))
-            .with_children(|parent| {
-                parent
-                    .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
-                    .insert(PlayerScore(Self::BREAK_COLOR));
-            });
+                PlayerScore(Self::BREAK_COLOR),
+            ));
     }
     fn place_player(
         commands: &mut Commands,
@@ -254,18 +248,41 @@ impl Player for BluePlayer {
         self.y = y;
     }
     fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
-        const BOARD_LEFT_POS: f32 = (MID_POS * BRICK_WIDTH + 200) as f32;
         commands
-            .spawn((Transform::from_xyz(BOARD_LEFT_POS, 0., 0.), PlayBoard, Sprite::default()))
-            .with_children(|parent| {
-                let up_margin: f32 = 60.;
-                let top_y: f32 = 180.;
-                let x: f32 = -50.;
-                parent.spawn(create_text_bundle("BLUE SCORE", x, top_y, asset_server));
-                parent
-                    .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
-                    .insert(PlayerScore(Self::BREAK_COLOR));
-            });
+            .spawn((
+                Text::new("BLUE SCORE"),
+                TextFont {
+                    font: asset_server.load(FIRASANS_FONT),
+                    font_size: 20.0,
+                    ..Default::default()
+                },
+                TextColor(GAME_DATA_TEXT_COLOR),
+                Node {
+                    align_content: AlignContent::End,
+                    align_items: AlignItems::End,
+                    align_self: AlignSelf::End,
+                    position_type: PositionType::Absolute,
+                    right: Val::Px(10.),
+                    top: Val::Px(470.0),
+                    ..Default::default()
+                },
+                PlayBoard,
+            ))
+            .with_child((
+                Text::new("0"),
+                TextFont {
+                    font: asset_server.load(FIRASANS_FONT),
+                    font_size: 42.0,
+                    ..Default::default()
+                },
+                TextColor(GAME_DATA_TEXT_COLOR),
+                Node {
+                    position_type: PositionType::Relative,
+                    top: Val::Px(50.0),
+                    ..Default::default()
+                },
+                PlayerScore(Self::BREAK_COLOR),
+            ));
     }
 
     fn place_player(
@@ -515,7 +532,6 @@ fn handle_move<P>(mut blue_query: Query<(&mut Transform, &P), With<P>>, timer: R
 where
     P: Player + Component,
 {
-    // TODO: place the player
     let (mut player_trans, state) = blue_query.single_mut();
 
     player_trans.translation.x += state.x() * timer.delta().as_secs_f32();
@@ -529,7 +545,7 @@ fn handle_score_update(
 ) {
     for (text, playerboard) in &text_query {
         let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
-        // *writer.text(text, 1) = count.to_string();
+        *writer.text(text, 0) = count.to_string();
     }
 }
 

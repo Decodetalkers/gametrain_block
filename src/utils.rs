@@ -27,7 +27,7 @@ pub trait EntitySpawner {
     fn spawn_button(
         &mut self,
         bundle: impl Bundle,
-        icon_image_path: &'static str,
+        icon_image_path: &str,
         title: &str,
         asset_server: &Res<AssetServer>,
     );
@@ -37,32 +37,32 @@ impl EntitySpawner for ChildBuilder<'_> {
     fn spawn_button(
         &mut self,
         bundle: impl Bundle,
-        icon_image_path: &'static str,
+        icon_image_path: &str,
         title: &str,
         asset_server: &Res<AssetServer>,
     ) {
         let font = asset_server.load(FIRASANS_FONT);
-        let button_style = Node {
-            width: Val::Px(250.0),
+        let button_node = Node {
+            width: Val::Px(280.0),
             height: Val::Px(95.0),
             margin: UiRect::all(Val::Px(20.0)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..default()
         };
-        let button_icon_style = Node {
+        let button_icon_node = Node {
             width: Val::Px(30.0),
             height: Val::Auto,
             position_type: PositionType::Relative,
             ..default()
         };
-        let button_text_style = TextFont {
+        let button_text_font = TextFont {
             font: font.clone(),
             font_size: 40.0,
             ..Default::default()
         };
 
-        self.spawn((Button, TextColor(NORMAL_BUTTON), button_style, bundle))
+        self.spawn((Button, TextColor(NORMAL_BUTTON), button_node, bundle))
             .with_children(|parent| {
                 let image = asset_server.load(icon_image_path);
                 parent.spawn((
@@ -70,9 +70,9 @@ impl EntitySpawner for ChildBuilder<'_> {
                         image,
                         ..Default::default()
                     },
-                    button_icon_style,
+                    button_icon_node,
                 ));
-                parent.spawn((Text::new(title), button_text_style, TextColor(TEXT_COLOR)));
+                parent.spawn((Text::new(title), button_text_font, TextColor(TEXT_COLOR)));
             });
     }
 }
