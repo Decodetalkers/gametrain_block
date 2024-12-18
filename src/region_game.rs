@@ -1,7 +1,5 @@
 use bevy::{
-    math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume},
-    prelude::*,
-    sprite::{Anchor, MaterialMesh2dBundle},
+     math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume}, prelude::*, sprite::{Anchor, MaterialMesh2dBundle}
 };
 
 use crate::{
@@ -202,25 +200,23 @@ impl Player for RedPlayer {
     ) {
         const LEN: i32 = BRICK_COUNT_WIDTH / 4;
         const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
+        use bevy::color::palettes::basic::PURPLE;
         commands.spawn((
-            //MaterialMesh2dBundle {
-            //    //mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-            //    //material: materials.add(ColorMaterial::from(Color::PURPLE)),
-            //    transform: Transform {
-            //        translation: Vec3 {
-            //            x: RED_X as f32,
-            //            y: 0.,
-            //            z: 1.,
-            //        },
-            //        scale: Vec3 {
-            //            x: 1.,
-            //            y: 1.,
-            //            z: 2.,
-            //        },
-            //        ..default()
-            //    },
-            //    ..default()
-            //},
+            Mesh2d(meshes.add(Circle::new(10.))),
+            Transform {
+                translation: Vec3 {
+                    x: RED_X as f32,
+                    y: 0.,
+                    z: 1.,
+                },
+                scale: Vec3 {
+                    x: 1.,
+                    y: 1.,
+                    z: 2.,
+                },
+                ..default()
+            },
+            MeshMaterial2d(materials.add(Color::from(PURPLE))),
             RedPlayer::new(),
         ));
     }
@@ -276,26 +272,22 @@ impl Player for BluePlayer {
         const LEN: i32 = BRICK_COUNT_WIDTH / 4;
         const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
         const BLUE_X: i32 = -RED_X;
-        // TODO: fix it
         commands.spawn((
-            //MaterialMesh2dBundle {
-            //    //mesh: meshes.add(shape::Circle::new(10.).into()).into(),
-            //    //material: materials.add(ColorMaterial::from(Color::BLACK)),
-            //    transform: Transform {
-            //        translation: Vec3 {
-            //            x: BLUE_X as f32,
-            //            y: 0.,
-            //            z: 1.,
-            //        },
-            //        scale: Vec3 {
-            //            x: 1.,
-            //            y: 1.,
-            //            z: 2.,
-            //        },
-            //        ..default()
-            //    },
-            //    ..default()
-            //},
+            Mesh2d(meshes.add(Circle::new(10.))),
+            Transform {
+                translation: Vec3 {
+                    x: BLUE_X as f32,
+                    y: 0.,
+                    z: 1.,
+                },
+                scale: Vec3 {
+                    x: 1.,
+                    y: 1.,
+                    z: 2.,
+                },
+                ..default()
+            },
+            MeshMaterial2d(materials.add(Color::from(Color::BLACK))),
             BluePlayer::new(),
         ));
     }
