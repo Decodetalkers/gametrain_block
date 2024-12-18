@@ -1,4 +1,5 @@
 use bevy::{
+    color::palettes::css::{GRAY, TOMATO},
     math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume},
     prelude::*,
 };
@@ -144,11 +145,11 @@ impl RedPlayer {
     }
 }
 
-const MAROON_COLOR: Color = Color::srgb(0.5019608, 0.0, 0.0);
+const TOMOTA_COLOR: Color = Color::Srgba(TOMATO);
 
 impl Player for RedPlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Red;
-    const RENDER_COLOR: Color = MAROON_COLOR;
+    const RENDER_COLOR: Color = TOMOTA_COLOR;
     fn x(&self) -> f32 {
         self.x
     }
@@ -167,7 +168,7 @@ impl Player for RedPlayer {
                 Text::new("RED SCORE"),
                 TextFont {
                     font: asset_server.load(FIRASANS_FONT),
-                    font_size: 20.0,
+                    font_size: 30.0,
                     ..Default::default()
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
@@ -231,7 +232,7 @@ struct BluePlayer {
     x: f32,
     y: f32,
 }
-const GRAY_COLOR: Color = Color::srgb(0.5019608, 0.5019608, 0.5019608);
+const GRAY_COLOR: Color = Color::Srgba(GRAY);
 impl Player for BluePlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Blue;
     const RENDER_COLOR: Color = GRAY_COLOR;
@@ -253,7 +254,7 @@ impl Player for BluePlayer {
                 Text::new("BLUE SCORE"),
                 TextFont {
                     font: asset_server.load(FIRASANS_FONT),
-                    font_size: 20.0,
+                    font_size: 30.0,
                     ..Default::default()
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
