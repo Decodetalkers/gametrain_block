@@ -55,13 +55,11 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             let image = asset_server.load("right.png");
             parent.spawn((
-                ImageBundle {
-                    image: ImageNode {
-                        image,
-                        ..Default::default()
-                    },
-                    ..default()
+                ImageNode {
+                    image,
+                    ..Default::default()
                 },
+                button_icon_style,
                 button_text_style.clone(),
             ));
             parent.spawn((

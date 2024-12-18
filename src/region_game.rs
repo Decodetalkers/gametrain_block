@@ -1,7 +1,6 @@
 use bevy::{
     math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume},
     prelude::*,
-    sprite::{Anchor, MaterialMesh2dBundle},
 };
 
 use crate::{
@@ -34,7 +33,8 @@ struct Collider;
 struct WallBundle {
     // You can nest bundles inside of other bundles like this
     // Allowing you to compose their functionality
-    sprite_bundle: SpriteBundle,
+    transform: Transform,
+    sprite: Sprite,
     collider: Collider,
 }
 
@@ -82,21 +82,18 @@ impl WallBundle {
     // making our code easier to read and less prone to bugs when we change the logic
     fn new(location: WallLocation) -> WallBundle {
         WallBundle {
-            sprite_bundle: SpriteBundle {
-                transform: Transform {
-                    // We need to convert our Vec2 into a Vec3, by giving it a z-coordinate
-                    // This is used to determine the order of our sprites
-                    translation: location.position().extend(0.0),
-                    // The z-scale of 2D objects must always be 1.0,
-                    // or their ordering will be affected in surprising ways.
-                    // See https://github.com/bevyengine/bevy/issues/4149
-                    scale: location.size().extend(1.0),
-                    ..default()
-                },
-                sprite: Sprite {
-                    color: WALL_COLOR,
-                    ..default()
-                },
+            transform: Transform {
+                // We need to convert our Vec2 into a Vec3, by giving it a z-coordinate
+                // This is used to determine the order of our sprites
+                translation: location.position().extend(0.0),
+                // The z-scale of 2D objects must always be 1.0,
+                // or their ordering will be affected in surprising ways.
+                // See https://github.com/bevyengine/bevy/issues/4149
+                scale: location.size().extend(1.0),
+                ..default()
+            },
+            sprite: Sprite {
+                color: WALL_COLOR,
                 ..default()
             },
             collider: Collider,
@@ -137,12 +134,14 @@ trait Player {
 
 fn create_text_bundle(msg: &str, x: f32, y: f32, asset_server: &Res<AssetServer>) -> impl Bundle {
     (
-        Text(msg.to_string()),
+        Text::new(msg),
         TextFont {
             font: asset_server.load(FIRASANS_FONT),
             font_size: 42.0,
+
             ..Default::default()
         },
+        Transform::from_xyz(x, y, 0.),
         TextColor(GAME_DATA_TEXT_COLOR),
     )
 }
@@ -178,20 +177,27 @@ impl Player for RedPlayer {
     }
     fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         const BOARD_LEFT_POS: f32 = (-MID_POS * BRICK_WIDTH - 80) as f32;
+        let up_margin: f32 = 60.;
+        let top_y: f32 = 180.;
+        let x: f32 = -50.;
         commands
             .spawn((
-                SpriteBundle {
-                    transform: Transform::from_xyz(BOARD_LEFT_POS, 0., 0.),
-                    ..default()
+                Text::new("RED SCORE"),
+                TextFont {
+                    font: asset_server.load(FIRASANS_FONT),
+                    font_size: 42.0,
+                    ..Default::default()
+                },
+                TextColor(GAME_DATA_TEXT_COLOR),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(10.),
+                    top: Val::Px(30.0),
+                    ..Default::default()
                 },
                 PlayBoard,
             ))
             .with_children(|parent| {
-                let up_margin: f32 = 60.;
-                let top_y: f32 = 180.;
-                let x: f32 = -50.;
-
-                parent.spawn(create_text_bundle("RED SCORE", x, top_y, asset_server));
                 parent
                     .spawn(create_text_bundle("0", x, top_y - up_margin, asset_server))
                     .insert(PlayerScore(Self::BREAK_COLOR));
@@ -250,13 +256,7 @@ impl Player for BluePlayer {
     fn place_board(commands: &mut Commands, asset_server: &Res<AssetServer>) {
         const BOARD_LEFT_POS: f32 = (MID_POS * BRICK_WIDTH + 200) as f32;
         commands
-            .spawn((
-                SpriteBundle {
-                    transform: Transform::from_xyz(BOARD_LEFT_POS, 0., 0.),
-                    ..default()
-                },
-                PlayBoard,
-            ))
+            .spawn((Transform::from_xyz(BOARD_LEFT_POS, 0., 0.), PlayBoard, Sprite::default()))
             .with_children(|parent| {
                 let up_margin: f32 = 60.;
                 let top_y: f32 = 180.;
@@ -328,7 +328,7 @@ impl Plugin for RegionGamePlugin {
                 handle_move::<BluePlayer>,
                 check_collider::<RedPlayer>,
                 check_collider::<BluePlayer>,
-                //handle_score_update,
+                handle_score_update,
             )
                 .chain()
                 .run_if(in_state(GameState::RegionGame)),
@@ -348,27 +348,24 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
         for index_x in 0..BRICK_COUNT_WIDTH + 1 {
             let real_x = (index_x - MID_POS) * BRICK_WIDTH;
             commands.spawn((
-                SpriteBundle {
-                    sprite: Sprite {
-                        color: if real_x > 0 {
-                            BluePlayer::RENDER_COLOR
-                        } else {
-                            RedPlayer::RENDER_COLOR
-                        },
-                        ..default()
+                Sprite {
+                    color: if real_x > 0 {
+                        BluePlayer::RENDER_COLOR
+                    } else {
+                        RedPlayer::RENDER_COLOR
                     },
-                    transform: Transform {
-                        scale: Vec3 {
-                            x: BRICK_WIDTH as f32,
-                            y: BRICK_WIDTH as f32,
-                            z: 0.,
-                        },
-                        translation: Vec3 {
-                            x: real_x as f32,
-                            y: real_y as f32,
-                            z: 0.,
-                        },
-                        ..default()
+                    ..default()
+                },
+                Transform {
+                    scale: Vec3 {
+                        x: BRICK_WIDTH as f32,
+                        y: BRICK_WIDTH as f32,
+                        z: 0.,
+                    },
+                    translation: Vec3 {
+                        x: real_x as f32,
+                        y: real_y as f32,
+                        z: 0.,
                     },
                     ..default()
                 },
@@ -388,16 +385,14 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
     BluePlayer::place_board(&mut commands, &asset_server);
     commands
         .spawn((
-            ButtonBundle {
-                background_color: NORMAL_BUTTON.into(),
-                node: Node {
-                    position_type: PositionType::Absolute,
-                    top: Val::Px(10.0),
-                    left: Val::Px(10.),
-                    ..default()
-                },
+            BackgroundColor(NORMAL_BUTTON),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(10.0),
+                left: Val::Px(10.),
                 ..default()
             },
+            Button,
             ReturnButton,
         ))
         .with_children(|parent| {
@@ -527,15 +522,16 @@ where
     player_trans.translation.y += state.y() * timer.delta().as_secs_f32();
 }
 
-//fn handle_score_update(
-//    mut text_query: Query<(&mut Text, &PlayerScore), With<PlayerScore>>,
-//    blocks: Query<&Brick>,
-//) {
-//    for (mut text, playerboard) in &mut text_query {
-//        let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
-//        text.sections[0].value = count.to_string();
-//    }
-//}
+fn handle_score_update(
+    text_query: Query<(Entity, &PlayerScore), (With<Text>, With<PlayerScore>)>,
+    blocks: Query<&Brick>,
+    mut writer: TextUiWriter,
+) {
+    for (text, playerboard) in &text_query {
+        let count = blocks.iter().filter(|b| b.0 == playerboard.0).count();
+        // *writer.text(text, 1) = count.to_string();
+    }
+}
 
 fn menu_action(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
