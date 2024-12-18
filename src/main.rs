@@ -28,14 +28,14 @@ fn main() {
             }),
             ..default()
         }))
+        .init_state::<GameState>()
         .add_systems(Startup, camera_setup)
-        .add_state::<GameState>()
         .add_plugins(menu::MenuPlugin)
         .add_plugins(region_game::RegionGamePlugin)
         .add_plugins(rps_game::RpsGamePlugin)
-        .run()
+        .run();
 }
 
 fn camera_setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 }
