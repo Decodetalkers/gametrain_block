@@ -1,5 +1,7 @@
 use bevy::{
-     math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume}, prelude::*, sprite::{Anchor, MaterialMesh2dBundle}
+    math::bounding::{Aabb2d, BoundingCircle, BoundingVolume, IntersectsVolume},
+    prelude::*,
+    sprite::{Anchor, MaterialMesh2dBundle},
 };
 
 use crate::{
@@ -157,9 +159,11 @@ impl RedPlayer {
     }
 }
 
+const MAROON_COLOR: Color = Color::srgb(0.5019608, 0.0, 0.0);
+
 impl Player for RedPlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Red;
-    const RENDER_COLOR: Color = Color::BLACK;
+    const RENDER_COLOR: Color = MAROON_COLOR;
     fn x(&self) -> f32 {
         self.x
     }
@@ -227,10 +231,10 @@ struct BluePlayer {
     x: f32,
     y: f32,
 }
-
+const GRAY_COLOR: Color = Color::srgb(0.5019608, 0.5019608, 0.5019608);
 impl Player for BluePlayer {
     const BREAK_COLOR: BrickColor = BrickColor::Blue;
-    const RENDER_COLOR: Color = Color::BLACK;
+    const RENDER_COLOR: Color = GRAY_COLOR;
     fn x(&self) -> f32 {
         self.x
     }
@@ -272,6 +276,7 @@ impl Player for BluePlayer {
         const LEN: i32 = BRICK_COUNT_WIDTH / 4;
         const RED_X: i32 = -MID_POS * BRICK_WIDTH + LEN * BRICK_WIDTH;
         const BLUE_X: i32 = -RED_X;
+        use bevy::color::palettes::basic::OLIVE;
         commands.spawn((
             Mesh2d(meshes.add(Circle::new(10.))),
             Transform {
@@ -287,7 +292,7 @@ impl Player for BluePlayer {
                 },
                 ..default()
             },
-            MeshMaterial2d(materials.add(Color::from(Color::BLACK))),
+            MeshMaterial2d(materials.add(Color::from(Color::Srgba(OLIVE)))),
             BluePlayer::new(),
         ));
     }
@@ -346,9 +351,9 @@ fn setup_basedata(mut commands: Commands, asset_server: Res<AssetServer>) {
                 SpriteBundle {
                     sprite: Sprite {
                         color: if real_x > 0 {
-                            Color::BLACK
+                            BluePlayer::RENDER_COLOR
                         } else {
-                            Color::WHITE
+                            RedPlayer::RENDER_COLOR
                         },
                         ..default()
                     },
