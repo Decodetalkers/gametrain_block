@@ -168,11 +168,12 @@ impl Player for RedPlayer {
                 Text::new("RED SCORE"),
                 TextFont {
                     font: asset_server.load(FIRASANS_FONT),
-                    font_size: 30.0,
+                    font_size: 20.0,
                     ..Default::default()
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
                 Node {
+                    justify_content: JustifyContent::Center,
                     align_self: AlignSelf::Start,
                     position_type: PositionType::Absolute,
                     left: Val::Px(10.),
@@ -190,6 +191,7 @@ impl Player for RedPlayer {
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
                 Node {
+                    justify_content: JustifyContent::Center,
                     align_content: AlignContent::Center,
                     position_type: PositionType::Relative,
                     top: Val::Px(50.0),
@@ -254,11 +256,12 @@ impl Player for BluePlayer {
                 Text::new("BLUE SCORE"),
                 TextFont {
                     font: asset_server.load(FIRASANS_FONT),
-                    font_size: 30.0,
+                    font_size: 20.0,
                     ..Default::default()
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
                 Node {
+                    justify_content: JustifyContent::Center,
                     align_content: AlignContent::End,
                     align_items: AlignItems::End,
                     align_self: AlignSelf::End,
@@ -278,6 +281,7 @@ impl Player for BluePlayer {
                 },
                 TextColor(GAME_DATA_TEXT_COLOR),
                 Node {
+                    justify_content: JustifyContent::Center,
                     position_type: PositionType::Relative,
                     top: Val::Px(50.0),
                     ..Default::default()
